@@ -1,0 +1,10 @@
+{
+    "entryPoints": [
+        "src/**/*.ts"
+    ],
+    "out": "docs",
+    "name": "API Documentation",
+    "theme": "default",
+    "includeVersion": true,
+    "hideGenerator": true
+}
