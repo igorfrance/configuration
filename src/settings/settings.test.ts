@@ -1,9 +1,9 @@
 import { expect, describe, it } from "vitest";
-import { Settings } from "./settings";
-import { env } from "./decorators";
+import { Settings } from ".";
+import { config } from "./decorators";
 
 const optional = true;
-const scalar = env.scalar;
+const scalar = config.scalar;
 
 describe("Settings", () => {
     class TestSettings1 extends Settings {

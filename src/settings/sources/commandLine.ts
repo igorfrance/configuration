@@ -1,38 +1,36 @@
-import { IValueSource } from "./value";
+import { IValueSource } from "../value";
 
 export class CommandLineArguments implements IValueSource {
 
-    argv: string[];
-    arguments: string[];
+    positional: string[] = [];
+
     private variables: Record<string, string> = {};
+    private argv: string[] = [];
 
     constructor(argv: string[] = []) {
         this.argv = [...argv];
-        this.parseCommandLine(argv);
+        this.parseCommandLine(this.argv);
     }
 
     parseCommandLine(argv: string[] = []) {
         const args = [...argv];
         while (args.length) {
-            let key = args.shift();
-            let value = args[0];
-            if (key.startsWith("--")) {
-                key = key.slice(2);
-            }
-            else if (key.startsWith("-")) {
-                key = key.slice(1);
-            }
-            else {
-                value = key;
-                key = null;
+
+            const arg = args.shift();
+            if (!arg.startsWith("-")) {
+                this.positional.push(arg);
+                continue;
             }
 
-            if (key) {
-                this.variables[key] = value;
+            let value: string;
+            if (!args[0] || args[0].startsWith("-")) {
+                value = null;
             }
             else {
-                this.arguments.push(value);
+                value = args.shift();
             }
+
+            this.variables[arg] = value;
         }
     }
 

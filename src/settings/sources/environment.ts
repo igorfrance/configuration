@@ -1,12 +1,10 @@
-import "dotenv/config";
-import { IValueSource } from "./value";
-
+import { IValueSource } from "../value";
 
 export class EnvironmentVariables implements IValueSource {
 
     private variables: Record<string, string> = {};
 
-    constructor(variables: Record<string, string> = process.env) {
+    constructor(variables: Record<string, string> = {}) {
         Object.assign(this.variables, variables);
     }
 

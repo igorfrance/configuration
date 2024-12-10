@@ -20,7 +20,6 @@ export interface IPropertyDescriptor<T extends VarType> {
 type VarTypeAny = VarType | any;
 type VariableInfo = IPropertyDescriptor<VarTypeAny> & { value: VarTypeAny };
 
-
 type SettingsComposite = {
     [key: string]: Settings | VarType;
 }
@@ -28,32 +27,32 @@ type SettingsComposite = {
 /**
  * Abstract base class for managing configuration settings with support for type validation,
  * nested settings, and environment variables.
- * 
+ *
  * Settings provides a framework for:
  * - Automatic variable extraction and configuration property assignment
  * - Type validation and conversion of configuration values
  * - Nested settings hierarchy management
  * - Variable validation and verification
  * - Configuration serialization
- * 
+ *
  * @example
  * ```typescript
  * class MySettings extends Settings {
  *   @ConfigVar({ type: Types.string })
  *   myVariable: string;
  * }
- * 
+ *
  * const settings = new MySettings();
  * const validation = settings.verify();
  * console.log(settings.stringify());
  * ```
- * 
+ *
  * @remarks
  * - Settings instances automatically initialize their configuration properties on construction
  * - Properties can be marked as optional or secret
  * - Supports recursive traversal of nested settings
  * - Provides validation for required variables
- * 
+ *
  * @see {@link ConfigVar} for property decoration
  * @see {@link Types} for supported variable types
  */
@@ -86,7 +85,7 @@ export abstract class Settings {
     }
 
     /**
-     * Gets a dictionary of all properties of current instance and optionally nested properties 
+     * Gets a dictionary of all properties of current instance and optionally nested properties
      * that derive from Settings.
      *
      * @param recursive - `true` to include nested properties that derive from Settings.
@@ -116,10 +115,10 @@ export abstract class Settings {
     /**
      * Retrieves a record of invalid variables and their associated settings.
      * A variable is considered invalid if it is non-optional and fails its type validation.
-     * 
+     *
      * @param recursive - If true, also checks for invalid variables in nested settings objects
      * @returns A Record where keys are field names and values are VariableInfo objects for invalid variables
-     * 
+     *
      * @example
      * ```typescript
      * const settings = new Settings();
@@ -157,7 +156,7 @@ export abstract class Settings {
      * - count: Statistics object with:
      *   - variables: Total number of variables
      *   - optional: Number of optional variables
-     *   - secret: Number of secret variables  
+     *   - secret: Number of secret variables
      *   - missing: Number of missing variables
      * - stringify: Bound method to convert configuration to string
      */
@@ -182,11 +181,11 @@ export abstract class Settings {
      * @param depth - The indentation depth level. Defaults to 0.
      * @param indent - The indentation string to use. Defaults to two spaces.
      * @returns A formatted string representing the settings hierarchy, with variables and nested settings.
-     * 
+     *
      * Variables are displayed in the format: `name=value (type)`, where:
      * - Secret values are masked as "***** (secret)"
      * - Type annotation is only shown for non-string types
-     * 
+     *
      * Nested settings are displayed with increased indentation and a colon suffix.
      */
     stringify(depth = 0, indent: string = "  "): string {
@@ -209,7 +208,20 @@ export abstract class Settings {
         return result.join("\n");
     }
 
-    static createConfigurationProperty<T extends VarType>(target: any, fieldName: string, settings: IPropertyDescriptor<T>) {
+    /**
+     * Creates a configuration property in the given target's meta data.
+     *
+     * If the target is not an instance of Settings, the property descriptor is assigned to the target right away.
+     *
+     *
+     * @template T - The type of the configuration property.
+     * @param target - The target object to which the configuration property will be assigned.
+     * @param fieldName - The name of the field for the configuration property.
+     * @param settings - The property descriptor containing the configuration settings.
+     */
+    static createConfigurationProperty<T extends VarType>(
+        target: any, fieldName: string, settings: IPropertyDescriptor<T>
+    ) {
         Settings.storeConfigurationProperty(target, fieldName, settings);
 
         if (!(target instanceof Settings)) {
@@ -217,7 +229,9 @@ export abstract class Settings {
         }
     }
 
-    static storeConfigurationProperty<T extends VarType>(target: any, fieldName: string, settings: IPropertyDescriptor<T>) {
+    static storeConfigurationProperty<T extends VarType>(
+        target: any, fieldName: string, settings: IPropertyDescriptor<T>
+    ) {
         const storeKey = Settings.getMetaStoreKey(target);
         const props = Reflect.getMetadata(storeKey, target) || {};
         props[fieldName] = settings;
@@ -225,7 +239,9 @@ export abstract class Settings {
         Reflect.defineMetadata(storeKey, props, target);
     }
 
-    static assignConfigurationProperty(target: any, fieldName: string, settings: IPropertyDescriptor<VarType>) {
+    static assignConfigurationProperty(
+        target: any, fieldName: string, settings: IPropertyDescriptor<VarType>
+    ) {
         const descriptor = Settings.createPropertyDescriptor(settings);
         Reflect.deleteProperty(target, fieldName);
         Reflect.defineProperty(target, fieldName, descriptor);
@@ -273,9 +289,9 @@ export abstract class Settings {
         }
 
         /**
-         * The setter will set the default value of the property. If the source value is not undefined, 
+         * The setter will set the default value of the property. If the source value is not undefined,
          * it will still be used as the value of this property regardless of setting the default value.
-         * 
+         *
          * If the original default value is not undefined, only a defined value can overwrite it.
          */
         function set(value: VarType) {
