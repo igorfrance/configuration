@@ -1,16 +1,5 @@
-import { env } from "./decorators";
-//import { Settings } from "./settings";
+import * as fs from "fs";
 
-class Subject {
-    prop1: string = "matter";
-
-    @env.scalar("SystemRoot")
-    prop2: string;
-
-}
-
-console.log(new Subject().prop1);
-console.log(new Subject().prop2);
-
+export const eslint = JSON.parse(fs.readFileSync(`${__dirname}/eslint/rules.json`, "utf-8"));
 export * from "./settings";
-export * from "./decorators";
+export default { eslint };

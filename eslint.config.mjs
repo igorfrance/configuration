@@ -1,6 +1,8 @@
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
+import * as fs from "fs";
 
+const eslint = JSON.parse(fs.readFileSync("./src/eslint/rules.json", "utf-8"));
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -12,10 +14,11 @@ export default [
     },
     pluginJs.configs.recommended,
     ...tseslint.configs.recommended,
+    eslint,
     {
         rules: {
-            semi: ["error", "always"],
-            quotes: ["error", "double"],
+            "max-len": ["warn", { "code": 120 }],
+            "implicit-arrow-linebreak": "off"
         }
     }
-]; 
+];

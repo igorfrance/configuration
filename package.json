@@ -5,6 +5,7 @@
     "main": "dist/index.js",
     "scripts": {
         "build": "tsc",
+        "postbuild": "node postbuild.mjs",
         "test": "vitest",
         "docs": "typedoc",
         "ts": "ts-node "
