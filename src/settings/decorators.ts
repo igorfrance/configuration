@@ -8,7 +8,7 @@ import { ITypeInfo, IValueSource, VarType, Value } from "./value";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Decorator = (target: any, fieldName: string) => void;
 
-export type DecoratorFactory = (specs: string | IPropertyDescriptor<VarType>) => Decorator;
+export type DecoratorFactory = (specs: string | number | IPropertyDescriptor<VarType>) => Decorator;
 
 type DecoratorFactoryTypes = {
     number: DecoratorFactory;
@@ -77,10 +77,16 @@ function createFieldDecorator<T extends VarType>(settings: IPropertyDescriptor<T
 
 function createDecoratorFactoryForType<T extends VarType>(type: ITypeInfo<T>, source: IValueSource): DecoratorFactory {
 
-    return function (specs: string | IPropertyDescriptor<T>) {
+    return function (specs: string | number | IPropertyDescriptor<T>) {
         const parameterSpecs: IPropertyDescriptor<T> = Object.assign({}, specs, { type, source });
         if (typeof specs === "string") {
             parameterSpecs.name = specs;
+            parameterSpecs.type = type;
+            parameterSpecs.optional = true;
+            parameterSpecs.source = source;
+        }
+        else if (typeof specs === "number") {
+            parameterSpecs.index = specs;
             parameterSpecs.type = type;
             parameterSpecs.optional = true;
             parameterSpecs.source = source;
@@ -90,7 +96,7 @@ function createDecoratorFactoryForType<T extends VarType>(type: ITypeInfo<T>, so
     };
 }
 
-function createDecoratorFactory(source: IValueSource): PropertyFactory {
+export function createDecoratorFactory(source: IValueSource): PropertyFactory {
 
     const scalarGroup = createDecoratorFactoryForType<string>(typeInfo.string, source) as
         unknown as DecoratorFactoryGroup;
