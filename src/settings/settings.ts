@@ -15,6 +15,7 @@ export interface IPropertyDescriptor<T extends VarType> {
     secret?: boolean;
     doc?: string;
     source?: IValueSource;
+    index?: number;
 }
 
 type VarTypeAny = VarType | any;
@@ -284,7 +285,10 @@ export abstract class Settings {
             : type.convert(String(propertyDefault));
 
         function get() {
-            const value = source.getValue(varname);
+            const value = settings.index >= 0
+                ? source.getValue(settings.index)
+                : source.getValue(varname);
+
             return type.convert(value, defaultValue);
         }
 

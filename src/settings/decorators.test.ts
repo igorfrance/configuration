@@ -1,19 +1,38 @@
-import { expect, describe, it } from "vitest";
-import { DecoratorFactory, config, argv, PropertyFactory } from "./decorators";
+import { expect, describe, it, beforeEach } from "vitest";
+import { DecoratorFactory, createDecoratorFactory, PropertyFactory } from "./decorators";
 import { IValueSource, VarType } from "./value";
 
-type TestableVariableSource = IValueSource & {
-    setValue(name: string, value: string): void;
-    unsetValue(name: string): void;
-};
+export class TestVariableSource implements IValueSource {
+
+    private variables: Record<string, string> = {};
+
+    constructor(variables: Record<string, string> = {}) {
+        Object.assign(this.variables, variables);
+    }
+
+    public getValue(name: string): string | undefined {
+        return this.variables[name];
+    }
+
+    public setValue(name: string, value: string) {
+        this.variables[name] = value;
+    }
+
+    public unsetValue(name: string) {
+        delete this.variables[name];
+    }
+}
 
 describe("decorators", () => {
 
     function decoratorTest<T>(
         decorators: PropertyFactory, group: string, decoratorName: string,
-        defaultValue: VarType, environmentValue: VarType, expected: T, propName = "TEST"
+        defaultValue: VarType, configValue: VarType, expected: T, propName = "TEST"
     ) {
         const decorator: DecoratorFactory = decorators[group][decoratorName];
+
+        const varsource = decorators.source as TestVariableSource;
+        varsource.setValue(propName, configValue as string);
 
         class X {
             @decorator({ name: propName, default: defaultValue })
@@ -25,9 +44,6 @@ describe("decorators", () => {
             public value: VarType = defaultValue;
         }
 
-        const source = decorators.source as TestableVariableSource;
-        source.setValue(propName, environmentValue as string);
-
         if (group === "list") {
             expect(new X().value).toMatchObject(expected as string[]);
             expect(new Y().value).toMatchObject(expected as string[]);
@@ -36,10 +52,16 @@ describe("decorators", () => {
             expect(new X().value).toBe(expected);
             expect(new Y().value).toBe(expected);
         }
-        source.unsetValue(propName);
+        varsource.unsetValue(propName);
     }
 
     describe("env", () => {
+
+        let env: PropertyFactory;
+
+        beforeEach(() => {
+            env = createDecoratorFactory(new TestVariableSource());
+        });
 
         describe("@scalar.number", () => {
             it.each([
@@ -56,7 +78,7 @@ describe("decorators", () => {
                 [null, null, undefined],
                 [undefined, "NaNDOS", undefined],
             ])("(default: %s) should resolve value (%s) to (%s)", (defaultValue, environmentValue, expected) => {
-                decoratorTest<number>(config, "scalar", "number", defaultValue, environmentValue, expected);
+                decoratorTest<number>(env, "scalar", "number", defaultValue, environmentValue, expected);
             });
         });
 
@@ -69,7 +91,7 @@ describe("decorators", () => {
                 [undefined, null, undefined],
                 [undefined, undefined, undefined],
             ])("(default: %s) should resolve value (%s) to (%s)", (defaultValue, environmentValue, expected) => {
-                decoratorTest<string>(config, "scalar", "string", defaultValue, environmentValue, expected);
+                decoratorTest<string>(env, "scalar", "string", defaultValue, environmentValue, expected);
             });
         });
 
@@ -82,7 +104,7 @@ describe("decorators", () => {
                 [false, "abc", false],
                 [undefined, "abc", undefined],
             ])("(default: %s) should resolve value (%s) to (%s)", (defaultValue, environmentValue, expected) => {
-                decoratorTest<boolean>(config, "scalar", "boolean", defaultValue, environmentValue, expected);
+                decoratorTest<boolean>(env, "scalar", "boolean", defaultValue, environmentValue, expected);
             });
         });
 
@@ -92,12 +114,19 @@ describe("decorators", () => {
                 [["a", "b", "c"], "1", ["1"]],
                 [null, "1,2,3", ["1", "2", "3"]],
             ])("(default: %s) should resolve value (%s) to (%s)", (defaultValue, environmentValue, expected) => {
-                decoratorTest<string[]>(config, "list", "string", defaultValue, environmentValue, expected);
+                decoratorTest<string[]>(env, "list", "string", defaultValue, environmentValue, expected);
             });
         });
     });
 
     describe("argv", () => {
+
+        let argv: PropertyFactory;
+
+        beforeEach(() => {
+            argv = createDecoratorFactory(new TestVariableSource());
+        });
+
         describe("@scalar.number", () => {
             it.each([
                 [0, "10", 10],

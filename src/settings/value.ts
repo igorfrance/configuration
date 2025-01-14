@@ -24,7 +24,7 @@ export interface ITypeInfo<T extends VarType> {
  * The source objects from which configuration values are retrieved.
  */
 export interface IValueSource {
-    getValue(name: string): string | undefined;
+    getValue(name: string | number): string | undefined;
 }
 
 /**
@@ -109,7 +109,7 @@ export class Value {
     /**
      * Converts a given value to an array of a specified type using a provided converter function.
      * If the value is undefined or empty, returns a default value or an empty array.
-     * 
+     *
      * @template T - The type of the array elements.
      * @param {VarType} value - The value to be converted to an array.
      * @param {ValueConverter<VarType>} converter - The function used to convert each element of the array.
