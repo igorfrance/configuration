@@ -2,6 +2,7 @@
     "name": "@igorf/configuration",
     "version": "1.0.0",
     "description": "Unobtrusive configuration variables",
+    "repository": "https://github.com/igorfrance/configuration.git",
     "main": "dist/index.js",
     "scripts": {
         "build": "tsc",
