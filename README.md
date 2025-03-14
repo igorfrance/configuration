@@ -1,4 +1,4 @@
-# @igorf/configuration 
+# Configuration 
 
 A TypeScript library for declarative configuration management using property decorators to access configuration parameters from different sources such as environment variables and command line arguments.
 
